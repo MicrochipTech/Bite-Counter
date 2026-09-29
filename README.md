@@ -1,83 +1,96 @@
-# Meal Monitoring Dashboard
+<p align="center">
+  <img src="docs/images/drinking.png" width="700"/>
+</p>
 
-Real-time meal monitoring using dual AI models on the **Hailo-8** accelerator. Detects food, utensils, and drinks with YOLOv8m while simultaneously tracking body pose with YOLOv8s_pose to classify eating gestures — all running on a single chip via round-robin scheduling.
+<h1 align="center">Bite Counter</h1>
 
-Built for Windows laptops with Hailo-8 connected through a Thunderbolt PCIe enclosure.
+<p align="center">
+  Real-time meal monitoring with dual AI models on the Hailo-8 accelerator
+</p>
 
-<!-- TODO: Add screenshot of the dashboard in action -->
+<p align="center">
+  <img src="https://img.shields.io/badge/Hailo-8-00A4EF?logoColor=white" alt="Hailo-8"/>
+  <img src="https://img.shields.io/badge/Windows-10%2F11-0078D6?logo=windows&logoColor=white" alt="Windows"/>
+  <img src="https://img.shields.io/badge/Thunderbolt-3%2F4-00B4D8?logo=thunderbolt&logoColor=white" alt="Thunderbolt"/>
+  <img src="https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white" alt="Python"/>
+  <img src="https://img.shields.io/badge/YOLOv8-Detection%20%2B%20Pose-FF6F00" alt="YOLOv8"/>
+</p>
+
+---
+
+Detects food, utensils, and drinks using **YOLOv8m** while simultaneously tracking body pose with **YOLOv8s_pose** to classify eating gestures — both models running on a single Hailo-8 chip via round-robin scheduling.
+
+## Demo
+
+| Eating | Drinking | Utensil Detection |
+|:---:|:---:|:---:|
+| <img src="docs/images/eating.png" width="280"/> | <img src="docs/images/drinking.png" width="280"/> | <img src="docs/images/utensil.png" width="280"/> |
+| Pizza detected, gesture: **Eating (75%)** | Bottle detected, gesture: **Drinking (100%)** | Fork detected, gesture: **Eating (75%)** |
+
+## Features
+
+- **Dual-model inference** on a single Hailo-8 chip (26 TOPS)
+- **Food detection** — pizza, sandwich, banana, apple, and 6 more COCO food classes
+- **Utensil tracking** — fork, knife, spoon, bowl, bottle, cup, wine glass
+- **Gesture classification** — Eating, Drinking, Reaching, Resting from pose keypoints
+- **Live dashboard** — real-time stats, event log, duration timer
+- **Skeleton overlay** — 17-keypoint body pose drawn on camera feed
+- **One-command setup** — `setup.bat` handles everything
 
 ## Hardware Requirements
 
 | Component | Details |
 |---|---|
-| **Hailo-8** | M.2 M-Key AI accelerator module (26 TOPS) |
-| **Thunderbolt enclosure** | M.2 to Thunderbolt PCIe enclosure |
-| **Laptop** | Windows 10/11 with Thunderbolt 3 or 4 port |
-| **Webcam** | USB or integrated webcam |
+| ![Hailo-8](https://img.shields.io/badge/Hailo-8-00A4EF) | M.2 M-Key AI accelerator (26 TOPS, PCIe Gen3 x4) |
+| ![Thunderbolt](https://img.shields.io/badge/Thunderbolt-Enclosure-00B4D8) | M.2 to Thunderbolt PCIe enclosure |
+| ![Windows](https://img.shields.io/badge/Windows-10%2F11-0078D6) | Laptop with Thunderbolt 3 or 4 port |
+| ![Webcam](https://img.shields.io/badge/USB-Webcam-gray) | USB or integrated webcam |
 
 ## Quick Start
 
-### Step 1: Install HailoRT
+### 1. Install HailoRT
 
-Download from the [Hailo Developer Zone](https://hailo.ai/developer-zone/) (Software Downloads > HailoRT > Windows):
+Download from the [Hailo Developer Zone](https://hailo.ai/developer-zone/):
 
-1. Run **HailoRT Windows installer** (`HailoRT-X.XX.X-win64.exe`) — installs PCIe driver + runtime
-2. Download the **HailoRT Python wheel** (`hailort-X.XX.X-cpXXX-win_amd64.whl`) — you'll install this in Step 2
+- **HailoRT Windows installer** (`.exe`) — PCIe driver + runtime
+- **HailoRT Python wheel** (`.whl`) — Python bindings
 
-Verify the device is detected:
-
+Verify:
 ```cmd
 hailortcli fw-control identify
 ```
 
-### Step 2: Run Setup
+### 2. Clone and Setup
 
 ```cmd
-git clone https://github.com/MicrochipTech/meal-monitoring.git
-cd meal-monitoring
+git clone https://github.com/MicrochipTech/Bite-Counter.git
+cd Bite-Counter
 setup.bat
 ```
 
-Then install the HailoRT Python wheel into the venv:
-
+Then install the HailoRT Python wheel:
 ```cmd
 venv\Scripts\activate
 pip install path\to\hailort-4.23.0-cp310-cp310-win_amd64.whl
 ```
 
-### Step 3: Run
+### 3. Run
 
 ```cmd
 run.bat
 ```
 
-Or manually:
-
-```cmd
-venv\Scripts\activate
-set PYTHONPATH=deps\hailo-apps
-set HAILO_ARCH=hailo8
-python src\meal_monitoring.py -n yolov8m -i usb --show-fps
-```
-
-AI models download automatically on first run (~40 MB total).
+AI models (~40 MB) download automatically on first run. Press **Q** to quit.
 
 ## What You'll See
 
-The app opens a window with two panels:
+<p align="center">
+  <img src="docs/images/eating.png" width="600"/>
+</p>
 
-**Left — Camera Feed:**
-- Bounding boxes around food, utensils, and drinks (color-coded)
-- Skeleton overlay on detected person (magenta lines, yellow keypoints)
+**Left panel** — Live camera feed with bounding boxes on food/utensils and skeleton overlay on detected person.
 
-**Right — Dashboard:**
-- Meal duration timer
-- Detected food items with confidence scores
-- Detected utensils/drinks with confidence scores
-- Current gesture: **Eating** / **Drinking** / **Reaching** / **Resting**
-- Event log with timestamps
-
-Press **Q** or **Esc** to quit.
+**Right panel** — Dashboard with meal duration, detected items, current gesture, and event log.
 
 ## Command Line Options
 
@@ -87,63 +100,97 @@ Press **Q** or **Esc** to quit.
 | `-i` | — | Input source (`usb` for webcam, or video file path) |
 | `--show-fps` | off | Display frame rate in terminal |
 | `--pose-model` | `yolov8s_pose` | Pose estimation model |
-| `--no-gesture` | off | Disable pose model for higher FPS (~25 vs ~12) |
+| `--no-gesture` | off | Single-model mode for higher FPS (~25 vs ~12) |
 | `--dashboard-width` | `400` | Dashboard panel width in pixels |
 
-## Architecture
-
-Two neural networks share the Hailo-8 chip via a single virtual device with round-robin scheduling:
+## How It Works
 
 ```
-USB Camera --> preprocess --> [YOLOv8m]      --> food/utensil detections --> BYTETracker
-                          --> [YOLOv8s_pose] --> 17 body keypoints      --> GestureClassifier
-                                                                              |
-                                                                              v
-                                                          MealState + DashboardRenderer --> Display
+                        ┌─────────────┐
+                        │  USB Camera │
+                        └──────┬──────┘
+                               │
+                        ┌──────▼──────┐
+                        │  Preprocess │  resize to 640x640
+                        └──────┬──────┘
+                               │
+              ┌────────────────┼────────────────┐
+              │                                 │
+     ┌────────▼────────┐             ┌──────────▼──────────┐
+     │    YOLOv8m      │             │   YOLOv8s_pose      │
+     │  Object Detect  │             │  Pose Estimation    │
+     └────────┬────────┘             └──────────┬──────────┘
+              │                                 │
+     ┌────────▼────────┐             ┌──────────▼──────────┐
+     │   BYTETracker   │             │ Gesture Classifier  │
+     │  Food/Utensils  │             │  3-Signal Voting    │
+     └────────┬────────┘             └──────────┬──────────┘
+              │                                 │
+              └────────────────┬────────────────┘
+                               │
+                     ┌─────────▼─────────┐
+                     │  Meal State +     │
+                     │  Dashboard Render │
+                     └─────────┬─────────┘
+                               │
+                        ┌──────▼──────┐
+                        │   Display   │
+                        └─────────────┘
 ```
 
-### Object Detection (YOLOv8m)
+Both models share the Hailo-8 chip via a single virtual device with `ROUND_ROBIN` scheduling. No GStreamer required.
 
-Filters COCO detections to meal-relevant classes:
-- **Food:** banana, apple, sandwich, orange, broccoli, carrot, hot dog, pizza, donut, cake (classes 46-55)
-- **Utensils:** fork, knife, spoon, bowl, dining table (classes 42-45, 60)
-- **Drinks:** bottle, wine glass, cup (classes 39-41)
+### Gesture Classification
 
-### Gesture Classification (3-Signal Voting)
+Three independent signals are evaluated per frame:
 
-The classifier tracks body keypoints over a 30-frame sliding window and evaluates three signals per frame:
+| Signal | What it checks | Weight |
+|--------|---------------|--------|
+| **Wrist near face** | Either wrist within 2.5x head-width of nose | 2x |
+| **Bent elbow** | Shoulder-elbow-wrist angle < 130 degrees | 1x |
+| **Raised wrist** | Either wrist above shoulder level | 1x |
 
-| Signal | What it checks |
-|--------|---------------|
-| **Wrist near face** | Either wrist within 2.5x head-width of nose (2+ of last 5 frames) |
-| **Bent elbow** | Shoulder-elbow-wrist angle < 130 degrees |
-| **Raised wrist** | Either wrist above shoulder level |
+| Signals | + Drink detected? | Result |
+|---------|-------------------|--------|
+| 2+ of 3 | No | **Eating** |
+| 2+ of 3 | Yes (bottle/cup/glass) | **Drinking** |
+| Raised + bent only | — | **Reaching** |
+| Both wrists below, still 10+ frames | — | **Resting** |
 
-Any 2 of 3 signals = **Eating**. If a drink (bottle/cup/glass) is also detected = **Drinking**.
+### Object Detection Classes
 
-### File Overview
+| Category | COCO IDs | Items |
+|----------|----------|-------|
+| **Food** | 46-55 | banana, apple, sandwich, orange, broccoli, carrot, hot dog, pizza, donut, cake |
+| **Utensils** | 42-45, 60 | fork, knife, spoon, bowl, dining table |
+| **Drinks** | 39-41 | bottle, wine glass, cup |
 
-| File | Purpose |
-|------|---------|
-| `src/meal_monitoring.py` | Main entry point — dual HailoInfer setup, CLI args, inference thread |
-| `src/meal_monitoring_post_process.py` | Post-processing callback — OD filtering, skeleton drawing, gesture integration |
-| `src/meal_state.py` | State tracker — food items, utensils, gesture, event log |
-| `src/dashboard_renderer.py` | OpenCV-rendered side panel |
-| `src/gesture_classifier.py` | 3-signal heuristic classifier |
-| `src/pose_utils.py` | Wraps PoseEstPostProcessing from hailo-apps pose estimation |
-| `config.json` | Score threshold (0.35), tracker buffer (45) |
+## Project Structure
 
-## Verification Checklist
-
-- [ ] `hailortcli fw-control identify` shows the Hailo-8 device
-- [ ] App starts without import errors
-- [ ] Log shows `Found HEF in resources: ...yolov8m.hef`
-- [ ] Log shows `Loading pose model: ...yolov8s_pose.hef`
-- [ ] Camera feed shows bounding boxes on food/utensils
-- [ ] Skeleton drawn on detected person
-- [ ] Place a bottle in frame — appears under Utensils on dashboard
-- [ ] Raise hand to mouth — gesture changes to Eating or Drinking
-- [ ] Combined FPS: ~10-15 (shown in terminal with `--show-fps`)
+```
+Bite-Counter/
+├── README.md
+├── setup.bat                 # One-command Windows setup
+├── run.bat                   # One-click launcher
+├── config.json               # Score threshold, tracker config
+├── requirements.txt
+├── src/
+│   ├── meal_monitoring.py              # Main entry — dual HailoInfer, inference thread
+│   ├── meal_monitoring_post_process.py # OD + pose processing, skeleton drawing
+│   ├── meal_state.py                   # State tracking, event log
+│   ├── dashboard_renderer.py           # OpenCV dashboard panel
+│   ├── gesture_classifier.py           # 3-signal voting classifier
+│   └── pose_utils.py                   # Pose post-processing wrapper
+├── docs/
+│   ├── architecture.md                 # Detailed technical architecture
+│   ├── conversation_log.md             # Development log
+│   └── images/
+│       ├── eating.png
+│       ├── drinking.png
+│       └── utensil.png
+└── .claude/
+    └── skills/setup/SKILL.md           # Interactive setup skill for Claude Code
+```
 
 ## Troubleshooting
 
@@ -153,9 +200,23 @@ Any 2 of 3 signals = **Eating**. If a drink (bottle/cup/glass) is also detected 
 | Camera doesn't open | Close other apps using webcam (Teams, Zoom). Try `-i 1` for alternate camera |
 | `ModuleNotFoundError: hailo_platform` | Activate venv, reinstall the HailoRT `.whl` |
 | `ModuleNotFoundError: hailo_apps` | Check `PYTHONPATH` points to `deps\hailo-apps`, or re-run `setup.bat` |
-| Models not downloading | Check internet. Manually place `.hef` files in `C:\usr\local\hailo\resources\models\hailo8\` |
+| Models not downloading | Check internet. Place `.hef` files manually in `C:\usr\local\hailo\resources\models\hailo8\` |
 | Gesture stuck on Resting | Ensure pose model loaded (check logs). Move hand clearly to face with bent elbow |
 | Very low FPS (< 5) | Close other apps. Verify Thunderbolt connection (not USB fallback). Try `--no-gesture` |
+
+## Performance
+
+| Mode | FPS | Models |
+|------|-----|--------|
+| Dual model (default) | ~10-15 | YOLOv8m + YOLOv8s_pose |
+| Single model (`--no-gesture`) | ~20-25 | YOLOv8m only |
+
+## Built With
+
+- [Hailo-8](https://hailo.ai/) — 26 TOPS AI accelerator
+- [hailo-apps](https://github.com/hailo-ai/hailo-apps) — Application framework (HailoInfer, BYTETracker, toolbox)
+- [YOLOv8](https://docs.ultralytics.com/) — Object detection and pose estimation models
+- [OpenCV](https://opencv.org/) — Camera capture and rendering
 
 ## License
 
