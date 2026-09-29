@@ -1,0 +1,1 @@
+hailo-apps @ git+https://github.com/hailo-ai/hailo-apps.git@main
