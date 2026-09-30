@@ -35,6 +35,10 @@ if not exist "deps\hailo-apps" (
     echo hailo-apps already cloned, skipping.
 )
 
+:: Patch cython_bbox dependency (requires C++ compiler — use NumPy fallback instead)
+echo Patching BYTETracker to remove C++ build dependency...
+python patches\fix_cython_bbox.py
+
 :: Create virtual environment
 if not exist "venv" (
     echo Creating virtual environment...
