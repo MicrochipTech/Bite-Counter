@@ -11,9 +11,10 @@ MATCHING_PY = os.path.join(
 )
 PYPROJECT = os.path.join("deps", "hailo-apps", "pyproject.toml")
 
-OLD_IMPORT = "from cython_bbox import bbox_overlaps as bbox_ious"
+OLD_IMPORT = "\nfrom cython_bbox import bbox_overlaps as bbox_ious\n"
 
-NEW_IMPORT = """try:
+NEW_IMPORT = """
+try:
     from cython_bbox import bbox_overlaps as bbox_ious
 except ImportError:
     def bbox_ious(atlbrs, btlbrs):

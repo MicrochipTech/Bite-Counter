@@ -43,13 +43,12 @@ from hailo_apps.python.core.common.hailo_logger import (
 )
 from hailo_apps.python.core.common.core import handle_and_resolve_args, resolve_hef_path
 
-from hailo_apps.python.standalone_apps.meal_monitoring.meal_monitoring_post_process import (
-    meal_inference_result_handler,
-)
-from hailo_apps.python.standalone_apps.meal_monitoring.meal_state import MealState
-from hailo_apps.python.standalone_apps.meal_monitoring.dashboard_renderer import DashboardRenderer
-from hailo_apps.python.standalone_apps.meal_monitoring.pose_utils import PoseExtractor
-from hailo_apps.python.standalone_apps.meal_monitoring.gesture_classifier import GestureClassifier
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from meal_monitoring_post_process import meal_inference_result_handler
+from meal_state import MealState
+from dashboard_renderer import DashboardRenderer
+from pose_utils import PoseExtractor
+from gesture_classifier import GestureClassifier
 
 APP_NAME = "meal_monitoring"
 logger = get_logger(__name__)
