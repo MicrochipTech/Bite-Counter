@@ -26,11 +26,18 @@ if errorlevel 1 (
     echo.
 )
 
-:: Clone hailo-apps framework
+:: Clone hailo-apps framework (pinned to v26.03.1)
 if not exist "deps\hailo-apps" (
     echo Cloning hailo-apps framework...
     mkdir deps 2>nul
-    git clone https://github.com/hailo-ai/hailo-apps.git deps\hailo-apps
+    git clone --depth 1 --branch v26.03.1 https://github.com/hailo-ai/hailo-apps.git deps\hailo-apps
+    if errorlevel 1 (
+        echo Falling back to commit pin...
+        git clone https://github.com/hailo-ai/hailo-apps.git deps\hailo-apps
+        cd deps\hailo-apps
+        git checkout 891ce70
+        cd ..\..
+    )
 ) else (
     echo hailo-apps already cloned, skipping.
 )
@@ -39,10 +46,10 @@ if not exist "deps\hailo-apps" (
 echo Patching BYTETracker to remove C++ build dependency...
 python patches\fix_cython_bbox.py
 
-:: Create virtual environment
+:: Create isolated virtual environment (no --system-site-packages to avoid version conflicts)
 if not exist "venv" (
     echo Creating virtual environment...
-    python -m venv --system-site-packages venv
+    python -m venv venv
 ) else (
     echo Virtual environment already exists, skipping.
 )
@@ -51,17 +58,22 @@ if not exist "venv" (
 echo Installing dependencies...
 call venv\Scripts\activate.bat
 pip install -e deps\hailo-apps
+pip install pillow pygrabber
 
 echo.
 echo ============================================
 echo  Setup complete!
 echo ============================================
 echo.
-echo Next steps:
-echo   1. Install HailoRT Python wheel (if not done):
-echo      venv\Scripts\activate
-echo      pip install path\to\hailort-X.XX.X-cpXXX-win_amd64.whl
+echo IMPORTANT: Install the HailoRT Python wheel into this venv.
+echo The wheel version MUST match your installed HailoRT runtime,
+echo and the Python version (cp310, cp312, etc.) must match your Python.
 echo.
-echo   2. Run the app:
-echo      run.bat
+echo   venv\Scripts\activate
+echo   pip install path\to\hailort-X.XX.X-cpXXX-win_amd64.whl
+echo.
+echo To verify:
+echo   python -c "from hailo_platform import VDevice; print('OK')"
+echo.
+echo Then run:  .\run.bat
 echo.

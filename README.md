@@ -68,10 +68,17 @@ cd Bite-Counter
 setup.bat
 ```
 
-Then install the HailoRT Python wheel:
+Then install the HailoRT Python wheel into the venv. The wheel **must match** both your HailoRT runtime version and your Python version:
 ```cmd
 venv\Scripts\activate
-pip install path\to\hailort-4.23.0-cp310-cp310-win_amd64.whl
+pip install path\to\hailort-X.XX.X-cpXXX-cpXXX-win_amd64.whl
+```
+
+> **Example:** HailoRT 4.24.0 + Python 3.12 → `hailort-4.24.0-cp312-cp312-win_amd64.whl`
+
+Verify:
+```cmd
+python -c "from hailo_platform import VDevice; print('HailoRT OK')"
 ```
 
 ### 3. Run
@@ -197,8 +204,10 @@ Bite-Counter/
 | Problem | Solution |
 |---------|----------|
 | `No Hailo device found` | Check enclosure power, authorize Thunderbolt in Windows Settings, reconnect cable |
+| `DLL load failed ... _pyhailort` | HailoRT wheel version doesn't match installed runtime. Reinstall the `.whl` that matches your HailoRT version (check with `hailortcli fw-control identify`) and Python version (`python --version`) |
+| `HAILO_OUT_OF_PHYSICAL_DEVICES` | Another process is using the Hailo chip. Close any other Hailo app or Python process, then retry |
 | Camera doesn't open | Close other apps using webcam (Teams, Zoom). Try `-i 1` for alternate camera |
-| `ModuleNotFoundError: hailo_platform` | Activate venv, reinstall the HailoRT `.whl` |
+| `ModuleNotFoundError: hailo_platform` | Activate venv, reinstall the HailoRT `.whl` matching your runtime + Python version |
 | `ModuleNotFoundError: hailo_apps` | Check `PYTHONPATH` points to `deps\hailo-apps`, or re-run `setup.bat` |
 | Models not downloading | Check internet. Place `.hef` files manually in `C:\usr\local\hailo\resources\models\hailo8\` |
 | Gesture stuck on Resting | Ensure pose model loaded (check logs). Move hand clearly to face with bent elbow |
